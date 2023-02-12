@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  labels:
+    app: webapp
+spec:                                 #Specification of the desired behavior of the Deployment.
+  replicas: 1                        # Number of desired pods
+  selector:                           # It must match the pod template's labels.
+    matchLabels:
+      app: webapp
+  template:                           # Template describes the pods that will be created.describes the data a pod should have when created from a template 
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:                     # List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod
+      - name: webapp                   # Name of the container
+        image: mongo-express:latest              # Docker image name
+        ports:                        # List of ports to expose from the container
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: mongo-config          # value comming from metadata secret.yaml file
+              key: mongo-url
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret          # value comming from metadata secret.yaml file
+              key: mongo-user
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret          # value comming from metadata secret.yaml file
+              key: mongo-pass
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+spec:
+  selector:
+    app: webapp                 # same as labels in deplotment label tag
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30100

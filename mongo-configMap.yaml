@@ -1,0 +1,9 @@
+# configaration required to reach mongo-db
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  mongo-url: # "visit later"
+
+  

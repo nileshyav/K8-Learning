@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongo
+spec:                                 #Specification of the desired behavior of the Deployment.
+  replicas: 1                         # Number of desired pods
+  selector:                           # It must match the pod template's labels.
+    matchLabels:
+      app: mongo
+  template:                           # Template describes the pods that will be created.describes the data a pod should have when created from a template 
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:                     # List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod
+      - name: mongo                   # Name of the container
+        image: mongo:5.0              # Docker image name
+        ports:                        # List of ports to expose from the container
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret          # value comming from metadata secret.yaml file
+              key: mongo-user
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret          # value comming from metadata secret.yaml file
+              key: mongo-pass
+
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongo                    # same as labels in deplotment label tag
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
